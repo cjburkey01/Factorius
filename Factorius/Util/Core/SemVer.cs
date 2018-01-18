@@ -31,9 +31,9 @@
 
 		public override int GetHashCode() {
 			int result = 17 * 39;
-			result *= 13 * major;
-			result *= 13 * minor;
-			result *= 13 * patch;
+			result += result * 13 * major;
+			result += result * 13 * minor;
+			result += result * 13 * patch;
 			return result;
 		}
 

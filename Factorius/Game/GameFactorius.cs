@@ -30,14 +30,7 @@ namespace Factorius {
 
 		public void OnLoad() {
 			shader = new ShaderProgram();
-			if (!shader.AddShader(ShaderType.VertexShader, "Res/Shader/shader.vert")) {
-				Console.WriteLine("Failed to add vertex shader.");
-				return;
-			}
-			if (!shader.AddShader(ShaderType.FragmentShader, "Res/Shader/shader.frag")) {
-				Console.WriteLine("Failed to add fragment shader.");
-				return;
-			}
+			shader.AddShaders(new Resource("Factorius", "Shader/Shader"));
 			if (!shader.Link()) {
 				Console.WriteLine("Failed to link program.");
 				return;
@@ -48,14 +41,41 @@ namespace Factorius {
 			Console.WriteLine("Shaders initiated.");
 			mesh = new Mesh();
 			mesh.SetMesh(new Vector3[] {
-				new Vector3(0.5f, -0.5f, 0.0f),
-				new Vector3(0.0f, 0.5f, 0.0f),
-				new Vector3(-0.5f, -0.5f, 0.0f),
-			}, new int[] { 0, 1, 2 }, new Vector2[0]);
+				new Vector3(1.0f, -1.0f, 0.0f),		// 0
+				new Vector3(1.0f, 1.0f, 0.0f),		// 1
+				new Vector3(-1.0f, 1.0f, 0.0f),		// 2
+				new Vector3(-1.0f, -1.0f, 0.0f),	// 3
+			}, new int[] {
+				0, 2, 3,	// Bottom-right triangle
+				2, 0, 1,	// Top-right triangle
+			}, new Vector2[] {
+				new Vector2(1.0f, 1.0f),
+				new Vector2(1.0f, 0.0f),
+				new Vector2(0.0f, 0.0f),
+				new Vector2(0.0f, 1.0f),
+			});
 			Console.WriteLine("Mesh created.");
 
 			Cam.transform.position.Z += 1.0f;
 			obj = World.AddObject();
+			MeshComponent meshe = obj.AddComponent<MeshComponent>();
+			meshe.GetMesh().SetMesh(new Vector3[] {
+				new Vector3(1.0f, -1.0f, 0.0f),		// 0
+				new Vector3(1.0f, 1.0f, 0.0f),		// 1
+				new Vector3(-1.0f, 1.0f, 0.0f),		// 2
+				new Vector3(-1.0f, -1.0f, 0.0f),	// 3
+			}, new int[] {
+				0, 2, 3,	// Bottom-right triangle
+				2, 0, 1,	// Top-right triangle
+			}, new Vector2[] {
+				new Vector2(1.0f, 1.0f),
+				new Vector2(1.0f, 0.0f),
+				new Vector2(0.0f, 0.0f),
+				new Vector2(0.0f, 1.0f),
+			});
+
+			AtlasHandler.BakeTextures();
+			Console.WriteLine("Baked textures.");
 		}
 
 		public void OnResize() {
@@ -69,7 +89,6 @@ namespace Factorius {
 
 		public void OnRender(double delta) {
 			World.OnRender(delta, shader);
-			mesh.Render();
 		}
 
 		public void OnExit() {

@@ -25,6 +25,20 @@ namespace Factorius {
 			return ret;
 		}
 
+		public void AddShaders(Resource res) {
+			Console.WriteLine("Adding shaders from resource: " + res + "(.vert/.frag/.geom/.geoe/.comp/.tcs/.tes)");
+
+			bool worked = AddShader(ShaderType.VertexShader, res.GetFullPath() + ".vert");
+			if (!worked) {
+				Console.WriteLine("Vertex shader failed.");
+			}
+
+			worked = AddShader(ShaderType.FragmentShader, res.GetFullPath() + ".frag");
+			if (!worked) {
+				Console.WriteLine("Fragment shader failed.");
+			}
+		}
+
 		public bool AddShader(ShaderType type, string path) {
 			if (IsLinked) {
 				Console.WriteLine("Shader program is already linked, cannot add another shader.");

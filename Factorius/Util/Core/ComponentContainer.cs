@@ -17,7 +17,7 @@ namespace Factorius {
 			T comp = Activator.CreateInstance<T>();
 			if (comp != null) {
 				components.Add(comp);
-				FieldInfo prop = comp.GetType().GetField("objP52a324rent5Pres3523sent3754837264357822758923", BindingFlags.NonPublic | BindingFlags.Instance);
+				FieldInfo prop = typeof(Component).GetField("objP52a324rent5Pres3523sent3754837264357822758923", BindingFlags.NonPublic | BindingFlags.Instance);
 				prop.SetValue(comp, this);
 				comp.OnAdd();
 				return comp;

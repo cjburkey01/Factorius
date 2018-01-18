@@ -9,6 +9,11 @@
 	<ItemGroup>
 		<PackageReference Include="OpenTK" Version="3.0.0-pre" />
 		<PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0002" />
+		<PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0002" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Res\Factorius\Sprite\Tile\" />
 	</ItemGroup>
 
 </Project>

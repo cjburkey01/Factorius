@@ -12,16 +12,6 @@ namespace Factorius {
 		private int tbo = -1;   // UV buffer
 		private int length;
 
-		public void Render() {
-			if (IsBuilt) {
-				GL.BindVertexArray(vao);
-				GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
-				GL.DrawElements(PrimitiveType.Triangles, length, DrawElementsType.UnsignedInt, 0);
-				GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-				GL.BindVertexArray(0);
-			}
-		}
-
 		public void SetMesh(Vector3[] verts, int[] inds, Vector2[] uvs) {
 			if (IsBuilt) {
 				DestroyMesh();
@@ -53,6 +43,16 @@ namespace Factorius {
 			GL.BindVertexArray(0);
 
 			IsBuilt = true;
+		}
+
+		public void Render() {
+			if (IsBuilt) {
+				GL.BindVertexArray(vao);
+				GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
+				GL.DrawElements(PrimitiveType.Triangles, length, DrawElementsType.UnsignedInt, 0);
+				GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+				GL.BindVertexArray(0);
+			}
 		}
 
 		public void DestroyMesh() {

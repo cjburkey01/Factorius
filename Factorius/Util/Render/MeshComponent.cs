@@ -6,6 +6,10 @@ namespace Factorius {
 		private Mesh mesh;
 		private GameObject objParent;
 
+		public Mesh GetMesh() {
+			return mesh;
+		}
+
 		public override void OnAdd() {
 			if (!(GetParent() is GameObject)) {
 				Console.WriteLine("Parent of mesh component must be a GameObject.");
