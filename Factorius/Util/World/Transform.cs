@@ -19,18 +19,5 @@ namespace Factorius {
 			this.scale = scale;
 		}
 
-		public Matrix4 GetMatrix(bool neg) {
-			float scalar = 1.0f;
-			if (neg) {
-				scalar = -1.0f;
-			}
-			Matrix4 translate = Matrix4.CreateTranslation(scalar * position);
-			Matrix4 rotationX = Matrix4.CreateRotationX(scalar * rotation.X);
-			Matrix4 rotationY = Matrix4.CreateRotationY(scalar * rotation.Y);
-			Matrix4 rotationZ = Matrix4.CreateRotationZ(scalar * rotation.Z);
-			Matrix4 scale = Matrix4.CreateScale(scalar * this.scale);
-			return scale * (rotationZ * rotationY * rotationX) * translate;	// Multiply backwards so we don't transpose.
-		}
-
 	}
 }

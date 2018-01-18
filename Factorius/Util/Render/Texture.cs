@@ -5,6 +5,10 @@ using OpenTK.Graphics.OpenGL;
 namespace Factorius {
 	abstract class Texture {
 
+		public static int repeat = (int) TextureWrapMode.Repeat;
+		public static int nearestMin = (int) TextureMinFilter.NearestMipmapNearest;
+		public static int nearestMag = (int) TextureMagFilter.Nearest;
+
 		public bool IsLoaded { private set; get; }
 
 		protected Image<Rgba32> img;
@@ -22,6 +26,10 @@ namespace Factorius {
 			byte[] data = img.SavePixelData();
 			texture = GL.GenTexture();
 			Bind();
+			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, ref repeat);
+			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, ref repeat);
+			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, ref nearestMin);
+			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, ref nearestMag);
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, img.Width, img.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data);
 			GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 			IsLoaded = true;

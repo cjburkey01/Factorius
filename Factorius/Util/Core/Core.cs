@@ -22,7 +22,25 @@ namespace Factorius {
 
 			Console.WriteLine("Loading: " + engine.GetName() + " | Version: " + engine.GetVersion());
 			GL.ClearColor(Color.CornflowerBlue);
+
+			SetWireframe(false);
+			SetFaceCulling(true);
+			GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
+
 			engine.OnLoad();
+		}
+
+		public void SetWireframe(bool wireframe) {
+			GL.PolygonMode(MaterialFace.FrontAndBack, (wireframe) ? PolygonMode.Line : PolygonMode.Fill);
+		}
+
+		public void SetFaceCulling(bool cullBack) {
+			if (cullBack) {
+				GL.Enable(EnableCap.CullFace);
+				GL.CullFace(CullFaceMode.Back);
+			} else {
+				GL.Disable(EnableCap.CullFace);
+			}
 		}
 
 		protected override void OnResize(EventArgs e) {

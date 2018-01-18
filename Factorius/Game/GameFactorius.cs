@@ -36,7 +36,9 @@ namespace Factorius {
 				return;
 			}
 
-			shader.InitUniform("transformMatrix");
+			shader.InitUniform("projectionMatrix");
+			shader.InitUniform("viewMatrix");
+			shader.InitUniform("modelMatrix");
 
 			Console.WriteLine("Shaders initiated.");
 			mesh = new Mesh();
@@ -56,31 +58,34 @@ namespace Factorius {
 			});
 			Console.WriteLine("Mesh created.");
 
-			Cam.transform.position.Z += 1.0f;
+			Cam.transform.position.Z -= 1.0f;
+			Cam.size = 1.0f;
 			obj = World.AddObject();
 			MeshComponent meshe = obj.AddComponent<MeshComponent>();
 			meshe.GetMesh().SetMesh(new Vector3[] {
-				new Vector3(1.0f, -1.0f, 0.0f),		// 0
-				new Vector3(1.0f, 1.0f, 0.0f),		// 1
+				new Vector3(-1.0f, -1.0f, 0.0f),	// 0
+				new Vector3(1.0f, -1.0f, 0.0f),		// 1
 				new Vector3(-1.0f, 1.0f, 0.0f),		// 2
-				new Vector3(-1.0f, -1.0f, 0.0f),	// 3
+				new Vector3(1.0f, 1.0f, 0.0f),		// 3
 			}, new int[] {
-				0, 2, 3,	// Bottom-right triangle
-				2, 0, 1,	// Top-right triangle
+				0, 1, 3,    // Bottom-right triangle
+				3, 2, 0,	// Top-left triangle
 			}, new Vector2[] {
-				new Vector2(1.0f, 1.0f),
 				new Vector2(1.0f, 0.0f),
 				new Vector2(0.0f, 0.0f),
+				new Vector2(1.0f, 1.0f),
 				new Vector2(0.0f, 1.0f),
 			});
 
+			AtlasHandler.AddTexture(new Resource("Factorius", "Sprite/Tile/Dirt"));
+			AtlasHandler.AddTexture(new Resource("Factorius", "Sprite/Tile/Stone"));
+			AtlasHandler.AddTexture(new Resource("Factorius", "Sprite/Tile/Grass"));
 			AtlasHandler.BakeTextures();
 			Console.WriteLine("Baked textures.");
 		}
 
 		public void OnResize() {
 			Console.WriteLine("Window size: " + Launch.Instance.Width + ", " + Launch.Instance.Height);
-			Transformation.UpdateProjection(Launch.Instance, Cam);
 		}
 
 		public void OnUpdate(double delta) {
@@ -88,7 +93,7 @@ namespace Factorius {
 		}
 
 		public void OnRender(double delta) {
-			World.OnRender(delta, shader);
+			World.OnRender(delta, shader, Cam);
 		}
 
 		public void OnExit() {

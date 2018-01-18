@@ -23,10 +23,12 @@ namespace Factorius {
 			}
 		}
 
-		public void OnRender(double delta, ShaderProgram shader) {
+		public void OnRender(double delta, ShaderProgram shader, Camera cam) {
 			shader.Use();
 			foreach (GameObject obj in objs.ToArray()) {
-				shader.SetUniform("transformMatrix", Transformation.GetProjection() * Transformation.GetViewMatrix(GameFactorius.Game.Cam) * Transformation.GetModelMatrix(obj.transform));
+				shader.SetUniform("projectionMatrix", Transformation.GetProjectionMatrix(cam));
+				shader.SetUniform("viewMatrix", Transformation.GetViewMatrix(cam));
+				shader.SetUniform("modelMatrix", Transformation.GetModelViewMatrix(obj.transform));
 				obj.OnRender(delta);
 			}
 		}

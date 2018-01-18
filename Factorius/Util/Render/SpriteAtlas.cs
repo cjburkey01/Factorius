@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using OpenTK;
 using SixLabors.Primitives;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace Factorius {
 	class AtlasHandler {
@@ -10,6 +11,8 @@ namespace Factorius {
 		public static readonly int ATLAS_SIZE = 512;
 		public static readonly int TEXTURE_SIZE = 32;
 		public static readonly int TEXTURE_ATLAS_ROW = ATLAS_SIZE / TEXTURE_SIZE;
+
+		public static readonly Image<Rgba32> ERROR = Helper.LoadImg(new Resource("Factorius", "Sprite/Raw/Error"));
 
 		private static Dictionary<int, SpriteAtlas> atlases = new Dictionary<int, SpriteAtlas>(); // Split up just in case.
 
@@ -75,9 +78,12 @@ namespace Factorius {
 				return false;
 			}
 			foreach (KeyValuePair<AtlasPos, Image<Rgba32>> kvp in tmp) {
+				Console.WriteLine("Baking texture: " + GetAt(kvp.Key));
 				atlas.Mutate(a => a.DrawImage(kvp.Value, 1.0f, new Size(AtlasHandler.TEXTURE_SIZE, AtlasHandler.TEXTURE_SIZE), kvp.Key.GetPoint()));
 			}
 			tmp.Clear();
+			atlas.Mutate(a => a.Flip(FlipType.Vertical));
+			atlas.Mutate(a => a.Flip(FlipType.Horizontal));
 			texture = new TextureRaw(atlas);
 			if (!texture.Load()) {
 				Console.WriteLine("Failed to upload texture atlas to GPU: " + id);
@@ -85,6 +91,15 @@ namespace Factorius {
 			}
 			Baked = true;
 			return true;
+		}
+
+		public Resource GetAt(AtlasPos pos) {
+			foreach (KeyValuePair<Resource, AtlasPos> at in atlas) {
+				if (at.Value.Equals(pos)) {
+					return at.Key;
+				}
+			}
+			return default(Resource);
 		}
 
 		public AtlasPos AddImage(Resource res) {
@@ -99,7 +114,7 @@ namespace Factorius {
 			Image<Rgba32> img = Helper.LoadImg(res);
 			if (img == null) {
 				Console.WriteLine("Image failed to load: " + res);
-				return AtlasPos.ERROR;
+				img = AtlasHandler.ERROR;
 			}
 			if (img.Width != 32 || img.Height != 32) {
 				Console.WriteLine("Texture must be exactly 32x32 pixels.");
@@ -189,7 +204,7 @@ namespace Factorius {
 		}
 
 		public Vector2 GetPixelPos() {
-			return new Vector2(x * AtlasHandler.TEXTURE_ATLAS_ROW, y * AtlasHandler.TEXTURE_ATLAS_ROW);
+			return new Vector2(x * AtlasHandler.TEXTURE_SIZE, y * AtlasHandler.TEXTURE_SIZE);
 		}
 
 		public Point GetPoint() {
