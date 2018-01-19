@@ -8,9 +8,11 @@ using SixLabors.ImageSharp.Processing;
 namespace Factorius {
 	class AtlasHandler {
 
-		public static readonly int ATLAS_SIZE = 512;
+		public static readonly int ATLAS_WIDTH = 512;
 		public static readonly int TEXTURE_SIZE = 32;
-		public static readonly int TEXTURE_ATLAS_ROW = ATLAS_SIZE / TEXTURE_SIZE;
+		public static readonly int TEXTURES_PER_ROW = ATLAS_WIDTH / TEXTURE_SIZE;
+		public static readonly float UV_SIZE = 1.0f / TEXTURES_PER_ROW;
+		public static readonly int TOTAL_TEXTURES = TEXTURES_PER_ROW * TEXTURES_PER_ROW;
 
 		public static readonly Image<Rgba32> ERROR = Helper.LoadImg(new Resource("Factorius", "Sprite/Raw/Error"));
 
@@ -59,7 +61,7 @@ namespace Factorius {
 
 	class SpriteAtlas {
 
-		public bool Full { get { return atlas.Count >= AtlasHandler.TEXTURE_ATLAS_ROW * AtlasHandler.TEXTURE_ATLAS_ROW; } }
+		public bool Full { get { return atlas.Count >= AtlasHandler.TOTAL_TEXTURES; } }
 		public bool Baked { private set; get; }
 
 		private int id;
@@ -148,8 +150,8 @@ namespace Factorius {
 			if (Full) {
 				return AtlasPos.ERROR;
 			}
-			for (int y = 0; y < AtlasHandler.TEXTURE_ATLAS_ROW; y++) {
-				for (int x = 0; x < AtlasHandler.TEXTURE_ATLAS_ROW; x++) {
+			for (int y = 0; y < AtlasHandler.TEXTURES_PER_ROW; y++) {
+				for (int x = 0; x < AtlasHandler.TEXTURES_PER_ROW; x++) {
 					AtlasPos pos = new AtlasPos(id, x, y);
 					if (!atlas.ContainsValue(pos)) {
 						return pos;
@@ -207,9 +209,17 @@ namespace Factorius {
 			return new Vector2(x * AtlasHandler.TEXTURE_SIZE, y * AtlasHandler.TEXTURE_SIZE);
 		}
 
+		public Vector2 GetUv() {
+			return new Vector2(AtlasHandler.UV_SIZE * x, AtlasHandler.UV_SIZE * (AtlasHandler.TEXTURES_PER_ROW - y));
+		}
+
 		public Point GetPoint() {
 			Vector2 tmp = GetPixelPos();
 			return new Point((int) tmp.X, (int) tmp.Y);
+		}
+
+		public bool IsErr() {
+			return Equals(ERROR);
 		}
 
 		public override string ToString() {

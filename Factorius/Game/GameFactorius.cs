@@ -1,23 +1,26 @@
 ﻿using System;
 using OpenTK;
-using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 
 namespace Factorius {
 	class GameFactorius : IGameEngine {
 
 		public static GameFactorius Game { private set; get; }
 
-		private ShaderProgram shader;
+		private ShaderProgram shaderBasic;
 		private Mesh mesh;
 		private GameObject obj;
+		private GuiBox box;
 
 		public Camera Cam { private set; get; }
 		public World World { private set; get; }
+		public GuiHandler GuiHandler { private set; get; }
 
 		public GameFactorius() {
 			Game = this;
 			Cam = new Camera();
 			World = new World();
+			GuiHandler = new GuiHandler();
 		}
 
 		public string GetName() {
@@ -29,18 +32,17 @@ namespace Factorius {
 		}
 
 		public void OnLoad() {
-			shader = new ShaderProgram();
-			shader.AddShaders(new Resource("Factorius", "Shader/Shader"));
-			if (!shader.Link()) {
+			shaderBasic = new ShaderProgram();
+			shaderBasic.AddShaders(new Resource("Factorius", "Shader/BasicTransformed"));
+			if (!shaderBasic.Link()) {
 				Console.WriteLine("Failed to link program.");
 				return;
 			}
+			shaderBasic.InitUniform("projectionMatrix");
+			shaderBasic.InitUniform("viewMatrix");
+			shaderBasic.InitUniform("modelMatrix");
 
-			shader.InitUniform("projectionMatrix");
-			shader.InitUniform("viewMatrix");
-			shader.InitUniform("modelMatrix");
-
-			Console.WriteLine("Shaders initiated.");
+			Console.WriteLine("Main shader initiated.");
 			mesh = new Mesh();
 			mesh.SetMesh(new Vector3[] {
 				new Vector3(1.0f, -1.0f, 0.0f),		// 0
@@ -56,10 +58,9 @@ namespace Factorius {
 				new Vector2(0.0f, 0.0f),
 				new Vector2(0.0f, 1.0f),
 			});
-			Console.WriteLine("Mesh created.");
 
-			Cam.transform.position.Z -= 1.0f;
-			Cam.size = 1.0f;
+			Cam.transform.position.Z = 1.0f;
+			Cam.size = 2.0f;
 			obj = World.AddObject();
 			MeshComponent meshe = obj.AddComponent<MeshComponent>();
 			meshe.GetMesh().SetMesh(new Vector3[] {
@@ -80,8 +81,14 @@ namespace Factorius {
 			AtlasHandler.AddTexture(new Resource("Factorius", "Sprite/Tile/Dirt"));
 			AtlasHandler.AddTexture(new Resource("Factorius", "Sprite/Tile/Stone"));
 			AtlasHandler.AddTexture(new Resource("Factorius", "Sprite/Tile/Grass"));
+
+			GuiHandler.Init(new Resource("Factorius", "Sprite/Gui/GuiBack"));
+
 			AtlasHandler.BakeTextures();
 			Console.WriteLine("Baked textures.");
+
+			box = new GuiBox(GuiHandler, new Vector2(0, 0), new Vector2(200.0f, 200.0f));
+			GuiHandler.AddElement(box);
 		}
 
 		public void OnResize() {
@@ -89,11 +96,34 @@ namespace Factorius {
 		}
 
 		public void OnUpdate(double delta) {
+			Vector3 vel = new Vector3();
+			if (Input.IsKeyDown(Key.Up)) {
+				vel.Y += 1.0f;
+			}
+			if (Input.IsKeyDown(Key.Down)) {
+				vel.Y -= 1.0f;
+			}
+			if (Input.IsKeyDown(Key.Right)) {
+				vel.X += 1.0f;
+			}
+			if (Input.IsKeyDown(Key.Left)) {
+				vel.X -= 1.0f;
+			}
+			if (vel != Vector3.Zero) {
+				vel.Normalize();
+				vel *= (float) delta * 10.0f;
+			}
+			Cam.transform.position += vel;
+			Vector3 p = Transformation.ScreenToWorld(Cam, Input.GetMousePos(), 0.0f);
+			//box.UpdateGlobalPosition(box.GlobalPosition + vel);
+			//obj.transform.position.X = p.X;
+			//obj.transform.position.Y = p.Y;
 			World.OnUpdate(delta);
 		}
 
 		public void OnRender(double delta) {
-			World.OnRender(delta, shader, Cam);
+			GuiHandler.OnRender(delta);
+			World.OnRender(delta, shaderBasic, Cam);
 		}
 
 		public void OnExit() {

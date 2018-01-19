@@ -1,4 +1,6 @@
-﻿namespace Factorius {
+﻿using OpenTK.Input;
+
+namespace Factorius {
 	interface IGameEngine {
 
 		string GetName();

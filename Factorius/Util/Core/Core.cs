@@ -3,6 +3,7 @@ using System.Drawing;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 
 namespace Factorius {
 	class Core : GameWindow {
@@ -13,8 +14,14 @@ namespace Factorius {
 		private long frames;
 		private long fps;
 
+		public Vector2 MousePos { private set; get; }
+
 		public Core(IGameEngine engine, int width, int height, string name) : base(width, height, GraphicsMode.Default, name, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible) {
 			this.engine = engine;
+		}
+
+		protected override void OnMouseMove(MouseMoveEventArgs e) {
+			MousePos = new Vector2(e.X, e.Y);
 		}
 
 		protected override void OnLoad(EventArgs e) {
@@ -22,9 +29,10 @@ namespace Factorius {
 
 			Console.WriteLine("Loading: " + engine.GetName() + " | Version: " + engine.GetVersion());
 			GL.ClearColor(Color.CornflowerBlue);
+			GL.Enable(EnableCap.DepthTest);
 
 			SetWireframe(false);
-			SetFaceCulling(true);
+			//SetFaceCulling(true);
 			GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
 
 			engine.OnLoad();
@@ -45,13 +53,14 @@ namespace Factorius {
 
 		protected override void OnResize(EventArgs e) {
 			base.OnResize(e);
-			GL.Viewport(0, 0, Width, Height);
+			GL.Viewport(0, 0, ClientSize.Width, ClientSize.Height);
 			engine.OnResize();
 		}
 
 		protected override void OnUpdateFrame(FrameEventArgs e) {
 			base.OnUpdateFrame(e);
 			engine.OnUpdate(e.Time);
+			Input.OnUpdate();
 		}
 
 		protected override void OnRenderFrame(FrameEventArgs e) {

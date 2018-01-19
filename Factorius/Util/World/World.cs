@@ -28,7 +28,7 @@ namespace Factorius {
 			foreach (GameObject obj in objs.ToArray()) {
 				shader.SetUniform("projectionMatrix", Transformation.GetProjectionMatrix(cam));
 				shader.SetUniform("viewMatrix", Transformation.GetViewMatrix(cam));
-				shader.SetUniform("modelMatrix", Transformation.GetModelViewMatrix(obj.transform));
+				shader.SetUniform("modelMatrix", Transformation.GetModelMatrix(obj.transform));
 				obj.OnRender(delta);
 			}
 		}

@@ -17,6 +17,8 @@ namespace Factorius {
 				DestroyMesh();
 			}
 
+			//System.Console.WriteLine("Verts: " + verts.Length + " | Tris: " + inds.Length + " | UVs: " + uvs.Length);
+
 			GL.GenVertexArrays(1, out vao);
 			GL.BindVertexArray(vao);
 

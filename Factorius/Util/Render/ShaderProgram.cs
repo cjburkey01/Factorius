@@ -26,7 +26,7 @@ namespace Factorius {
 		}
 
 		public void AddShaders(Resource res) {
-			Console.WriteLine("Adding shaders from resource: " + res + "(.vert/.frag/.geom/.geoe/.comp/.tcs/.tes)");
+			Console.WriteLine("Adding shaders from resource: " + res + "(.vert/.frag)");
 
 			bool worked = AddShader(ShaderType.VertexShader, res.GetFullPath() + ".vert");
 			if (!worked) {
