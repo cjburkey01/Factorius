@@ -15,12 +15,14 @@ namespace Factorius {
 		public Camera Cam { private set; get; }
 		public World World { private set; get; }
 		public GuiHandler GuiHandler { private set; get; }
+		public FontRenderer FontRenderer { private set; get; }
 
 		public GameFactorius() {
 			Game = this;
 			Cam = new Camera();
 			World = new World();
 			GuiHandler = new GuiHandler();
+			FontRenderer = new FontRenderer();
 		}
 
 		public string GetName() {
@@ -41,8 +43,8 @@ namespace Factorius {
 			shaderBasic.InitUniform("projectionMatrix");
 			shaderBasic.InitUniform("viewMatrix");
 			shaderBasic.InitUniform("modelMatrix");
-
 			Console.WriteLine("Main shader initiated.");
+
 			mesh = new Mesh();
 			mesh.SetMesh(new Vector3[] {
 				new Vector3(1.0f, -1.0f, 0.0f),		// 0
@@ -84,11 +86,13 @@ namespace Factorius {
 
 			GuiHandler.Init(new Resource("Factorius", "Sprite/Gui/GuiBack"));
 
+			FontRenderer.Init(new Resource("Factorius", "Font/Arial"));
+
 			AtlasHandler.BakeTextures();
 			Console.WriteLine("Baked textures.");
 
-			box = new GuiBox(GuiHandler, new Vector2(0, 0), new Vector2(200.0f, 200.0f));
-			GuiHandler.AddElement(box);
+			box = new GuiBox(GuiHandler, new Vector2(50, 50), new Vector2(200.0f, 200.0f));
+			//GuiHandler.AddElement(box);
 		}
 
 		public void OnResize() {
@@ -123,7 +127,7 @@ namespace Factorius {
 
 		public void OnRender(double delta) {
 			GuiHandler.OnRender(delta);
-			World.OnRender(delta, shaderBasic, Cam);
+			//World.OnRender(delta, shaderBasic, Cam);
 		}
 
 		public void OnExit() {

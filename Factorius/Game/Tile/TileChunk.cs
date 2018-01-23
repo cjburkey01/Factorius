@@ -4,10 +4,10 @@
 		public static readonly int CHUNK_SIZE;
 
 		public TilePos Chunk { private set; get; }
-		public World World { private set; get; }
+		public TileWorld World { private set; get; }
 		private TileInstance[,] tiles;
 
-		public TileChunk(TilePos chunkPos, World world) {
+		public TileChunk(TilePos chunkPos, TileWorld world) {
 			Chunk = chunkPos;
 			World = world;
 			tiles = new TileInstance[CHUNK_SIZE, CHUNK_SIZE];
@@ -24,20 +24,31 @@
 			}
 			return tiles[pos.x, pos.y];
 		}
-		
+
 		/// <summary>
 		///		Sets the tile at the position in the chunk to the specified
 		///		instance.
 		/// </summary>
 		/// <param name="pos">The position inside of the chunk.</param>
 		/// <param name="tile">The tile to be placed at the position.</param>
+		/// <param name="updateNeighbors">Whether or not the neighboring tiles should be updated.</param>
 		/// <returns>The tile set at the position, or null upon failure.</returns>
-		public TileInstance SetTile(TilePos pos, Tile tile) {
+		public TileInstance SetTile(TilePos pos, Tile tile, bool updateNeighbors) {
 			if (!InChunk(pos)) {
 				return null;
 			}
 			TileInstance inst = new TileInstance(tile, World, pos);
 			tiles[pos.x, pos.y] = inst;
+			if (updateNeighbors) {
+				for (int y = 0; y < 3; y++) {
+					for (int x = 0; x < 3; x++) {
+						TileInstance n = GetTile(new TilePos(pos.x + x - 1, pos.y + y - 1));
+						if (x != y && n != null) {
+							n.OnNeighborUpdate(GetTile(pos));
+						}
+					}
+				}
+			}
 			return inst;
 		}
 

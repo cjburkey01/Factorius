@@ -6,14 +6,26 @@ namespace Factorius {
 
 		public Tile Parent { private set; get; }
 		public TileData Data { private set; get; }
-		public World World { private set; get; }
+		public TileWorld World { private set; get; }
 		public TilePos Location { private set; get; }
 
-		public TileInstance(Tile parent, World world, TilePos pos) {
+		public TileInstance(Tile parent, TileWorld world, TilePos pos) {
 			Parent = parent;
 			Data = new TileData();
 			World = world;
 			Location = pos;
+		}
+
+		public void OnUpdate(double delta) {
+			Parent.OnUpdate(delta, this);
+		}
+
+		public void OnRender(double delta) {
+			Parent.OnRender(delta, this);
+		}
+
+		public void OnNeighborUpdate(TileInstance neighbor) {
+			Parent.OnNeighborChange(this, neighbor);
 		}
 
 		public override bool Equals(object obj) {
@@ -21,7 +33,7 @@ namespace Factorius {
 			return instance != null &&
 				   EqualityComparer<Tile>.Default.Equals(Parent, instance.Parent) &&
 				   EqualityComparer<TileData>.Default.Equals(Data, instance.Data) &&
-				   EqualityComparer<World>.Default.Equals(World, instance.World) &&
+				   EqualityComparer<TileWorld>.Default.Equals(World, instance.World) &&
 				   EqualityComparer<TilePos>.Default.Equals(Location, instance.Location);
 		}
 
@@ -29,7 +41,7 @@ namespace Factorius {
 			var result = -929053957;
 			result = result * -1521134295 + EqualityComparer<Tile>.Default.GetHashCode(Parent);
 			result = result * -1521134295 + EqualityComparer<TileData>.Default.GetHashCode(Data);
-			result = result * -1521134295 + EqualityComparer<World>.Default.GetHashCode(World);
+			result = result * -1521134295 + EqualityComparer<TileWorld>.Default.GetHashCode(World);
 			result = result * -1521134295 + EqualityComparer<TilePos>.Default.GetHashCode(Location);
 			return result;
 		}

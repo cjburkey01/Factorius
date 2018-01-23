@@ -7,7 +7,9 @@ using OpenTK.Input;
 
 namespace Factorius {
 	class Core : GameWindow {
-
+		
+		public bool debugFps = false;
+		
 		private IGameEngine engine;
 
 		private long lastFpsCheck;
@@ -28,11 +30,15 @@ namespace Factorius {
 			base.OnLoad(e);
 
 			Console.WriteLine("Loading: " + engine.GetName() + " | Version: " + engine.GetVersion());
+
 			GL.ClearColor(Color.CornflowerBlue);
 			GL.Enable(EnableCap.DepthTest);
 
+			GL.Enable(EnableCap.Blend);
+			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
 			SetWireframe(false);
-			//SetFaceCulling(true);
+			SetFaceCulling(true);
 			GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
 
 			engine.OnLoad();
@@ -71,12 +77,14 @@ namespace Factorius {
 			SwapBuffers();
 
 			// Output FPS
-			frames++;
-			if (Launch.GetTime() - lastFpsCheck >= 1000) {
-				lastFpsCheck = Launch.GetTime();
-				fps = frames;
-				frames = 0;
-				Console.WriteLine("FPS: " + fps);
+			if (debugFps) {
+				frames++;
+				if (Launch.GetTime() - lastFpsCheck >= 1000) {
+					lastFpsCheck = Launch.GetTime();
+					fps = frames;
+					frames = 0;
+					Console.WriteLine("FPS: " + fps);
+				}
 			}
 		}
 

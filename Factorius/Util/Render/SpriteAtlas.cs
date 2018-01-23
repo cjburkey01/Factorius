@@ -80,7 +80,7 @@ namespace Factorius {
 				return false;
 			}
 			foreach (KeyValuePair<AtlasPos, Image<Rgba32>> kvp in tmp) {
-				Console.WriteLine("Baking texture: " + GetAt(kvp.Key));
+				//Console.WriteLine("Baking texture: " + GetAt(kvp.Key));
 				atlas.Mutate(a => a.DrawImage(kvp.Value, 1.0f, new Size(AtlasHandler.TEXTURE_SIZE, AtlasHandler.TEXTURE_SIZE), kvp.Key.GetPoint()));
 			}
 			tmp.Clear();
@@ -98,6 +98,7 @@ namespace Factorius {
 		public Resource GetAt(AtlasPos pos) {
 			foreach (KeyValuePair<Resource, AtlasPos> at in atlas) {
 				if (at.Value.Equals(pos)) {
+					texture.Bind();
 					return at.Key;
 				}
 			}
