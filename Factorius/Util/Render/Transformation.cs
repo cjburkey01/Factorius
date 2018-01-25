@@ -12,7 +12,7 @@ namespace Factorius {
 		private static Matrix4 scale;
 
 		public static Matrix4 GetProjectionMatrix(Camera cam) {
-			projection = Matrix4.CreateOrthographic(GetAspectRatio(Launch.Instance) * cam.size * 2, cam.size * 2, 0.01f, 100.0f);
+			projection = Matrix4.CreateOrthographic(GetAspectRatio(Launch.Instance) * cam.size * 2, cam.size * 2, 0.001f, 100.0f);
 			return projection;
 		}
 

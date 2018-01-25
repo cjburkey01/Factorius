@@ -129,5 +129,19 @@ namespace Factorius {
 			}
 		}
 
+		public void SetUniform(string name, Vector2 value) {
+			int pos = GetUniformLocation(name);
+			if (pos >= 0) {
+				GL.Uniform2(pos, ref value);
+			}
+		}
+
+		public void SetUniform(string name, Vector4 value) {
+			int pos = GetUniformLocation(name);
+			if (pos >= 0) {
+				GL.Uniform4(pos, ref value);
+			}
+		}
+
 	}
 }

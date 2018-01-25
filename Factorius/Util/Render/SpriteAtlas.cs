@@ -98,7 +98,6 @@ namespace Factorius {
 		public Resource GetAt(AtlasPos pos) {
 			foreach (KeyValuePair<Resource, AtlasPos> at in atlas) {
 				if (at.Value.Equals(pos)) {
-					texture.Bind();
 					return at.Key;
 				}
 			}
@@ -137,6 +136,9 @@ namespace Factorius {
 		}
 
 		public bool ContainsTexture(Resource res) {
+			if (texture != null) {
+				texture.Bind();
+			}
 			return atlas.ContainsKey(res);
 		}
 

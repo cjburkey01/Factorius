@@ -139,5 +139,21 @@ namespace Factorius {
 			GL.DisableVertexAttribArray(0);
 		}
 
+		public override bool Equals(object obj) {
+			var mesh = obj as Mesh;
+			return mesh != null && IsBuilt == mesh.IsBuilt && vao == mesh.vao && vbo == mesh.vbo && ebo == mesh.ebo && tbo == mesh.tbo && length == mesh.length;
+		}
+
+		public override int GetHashCode() {
+			var hashCode = -1113740610;
+			hashCode = hashCode * -1521134295 + IsBuilt.GetHashCode();
+			hashCode = hashCode * -1521134295 + vao.GetHashCode();
+			hashCode = hashCode * -1521134295 + vbo.GetHashCode();
+			hashCode = hashCode * -1521134295 + ebo.GetHashCode();
+			hashCode = hashCode * -1521134295 + tbo.GetHashCode();
+			hashCode = hashCode * -1521134295 + length.GetHashCode();
+			return hashCode;
+		}
+
 	}
 }
