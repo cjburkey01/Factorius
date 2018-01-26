@@ -4,8 +4,10 @@ using System.Collections.Generic;
 namespace Factorius {
 	abstract class GuiElement {
 
+		private GuiHandler handler;
 		private GuiElement parent;
 		private Vector2 pos;
+		private GuiMouseState state;
 
 		/// <summary>
 		///		Returns the position of this element on the screen
@@ -19,6 +21,22 @@ namespace Factorius {
 				}
 				return pos - parent.pos;
 			}
+		}
+
+		public void SetMouseState(GuiMouseState s) {
+			state = s;
+		}
+
+		public void SetGuiHandler(GuiHandler handler) {
+			this.handler = handler;
+		}
+
+		public GuiMouseState GetMouseState() {
+			return state;
+		}
+
+		public GuiHandler GetGuiHandler() {
+			return handler;
 		}
 
 		public GuiHandler GuiHandler { private set; get; }

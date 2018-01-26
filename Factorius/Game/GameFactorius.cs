@@ -93,9 +93,9 @@ namespace Factorius {
 			Console.WriteLine("Baked textures.");
 
 			box = new GuiBox(GuiHandler, new Vector2(50, 50), new Vector2(200.0f, 200.0f));
-			//GuiHandler.AddElement(box);
+			GuiHandler.AddElement(box);
 
-			FontRenderer.AddText("Test Text!", new Vector2(0.0f, 0.0f), new Vector2(1.0f, 1.0f), new Vector4(1.0f, 0.5f, 0.0f, 1.0f));
+			FontRenderer.AddText("Test Text!", new Vector2(10.0f, 10.0f), new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 		}
 
 		public void OnResize() {
@@ -130,14 +130,14 @@ namespace Factorius {
 
 		public void OnRender(double delta) {
 			AtlasHandler.GetTexture(new Resource("Factorius", "Sprite/Tile/Grass"));    // TODO: Load textures in world, not here.
-			//World.OnRender(delta, shaderBasic, Cam);
+			World.OnRender(delta, shaderBasic, Cam);
 			GuiHandler.OnRender(delta);
 
 			FontRenderer.Render(new Vector2(Launch.Instance.Width, Launch.Instance.Height));
 		}
 
 		public void OnExit() {
-
+			FontRenderer.OnExit();
 		}
 
 	}

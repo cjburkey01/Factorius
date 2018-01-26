@@ -26,6 +26,7 @@ namespace Factorius {
 			MousePos = new Vector2(e.X, e.Y);
 		}
 
+		bool w;
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
 
@@ -54,6 +55,13 @@ namespace Factorius {
 				GL.CullFace(CullFaceMode.Back);
 			} else {
 				GL.Disable(EnableCap.CullFace);
+			}
+		}
+
+		protected override void OnKeyDown(KeyboardKeyEventArgs e) {
+			base.OnKeyDown(e);
+			if (!e.IsRepeat && e.Key.Equals(Key.J)) {
+				SetWireframe(w = !w);
 			}
 		}
 

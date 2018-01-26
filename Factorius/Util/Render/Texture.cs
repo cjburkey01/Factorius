@@ -1,5 +1,6 @@
 ﻿using System;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 using OpenTK.Graphics.OpenGL;
 
 namespace Factorius {
@@ -14,7 +15,7 @@ namespace Factorius {
 		protected Image<Rgba32> img;
 		private int texture;
 
-		public virtual bool Load() {
+		public virtual bool Load(bool flipHor, bool flipVert) {
 			if (IsLoaded) {
 				Console.WriteLine("Image is already loaded.");
 				return false;
@@ -26,10 +27,6 @@ namespace Factorius {
 			byte[] data = img.SavePixelData();
 			texture = GL.GenTexture();
 			Bind();
-			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, ref repeat);
-			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, ref repeat);
-			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, ref nearestMin);
-			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, ref nearestMag);
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, img.Width, img.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data);
 			GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 			IsLoaded = true;
@@ -38,6 +35,10 @@ namespace Factorius {
 
 		public void Bind() {
 			GL.BindTexture(TextureTarget.Texture2D, texture);
+			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, ref repeat);
+			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, ref repeat);
+			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, ref nearestMin);
+			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, ref nearestMag);
 		}
 
 		public int GetId() {
@@ -59,13 +60,19 @@ namespace Factorius {
 			this.path = path;
 		}
 
-		public override bool Load() {
+		public override bool Load(bool flipHor, bool flipVert) {
 			img = Image.Load(path);
+			if (flipHor) {
+				img.Mutate(a => a.Flip(FlipType.Horizontal));
+			}
+			if (flipVert) {
+				img.Mutate(a => a.Flip(FlipType.Vertical));
+			}
 			if (img == null) {
 				Console.WriteLine("Image: " + path + " not found.");
 				return false;
 			}
-			return base.Load();
+			return base.Load(flipHor, flipVert);
 		}
 
 	}

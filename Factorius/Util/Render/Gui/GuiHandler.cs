@@ -16,6 +16,9 @@ namespace Factorius {
 		
 		private ShaderProgram guiShader;
 
+		public Texture DefStateTexture { private set; get; }
+		public Texture DownStateTexture { private set; get; }
+
 		public void Init(Resource gui) {
 			if (IsInit) {
 				Console.WriteLine("GuiHandler is already initialized.");
@@ -34,12 +37,17 @@ namespace Factorius {
 			Console.WriteLine("GUI shader initiated.");
 
 			elements.Clear();
-			for (int y = 0; y < 3; y++) {
-				for (int x = 0; x < 3; x++) {
-					AtlasHandler.AddTexture(new Resource(gui.domain, gui.path + "-" + x + "-" + y));
-					AtlasHandler.AddTexture(new Resource(gui.domain, gui.path + "Down-" + x + "-" + y));
-				}
+
+			DefStateTexture = new TextureFile(new Resource("Factorius", "Sprite/Gui/GuiBack.png").GetFullPath());
+			DownStateTexture = new TextureFile(new Resource("Factorius", "Sprite/Gui/GuiBackDown.png").GetFullPath());
+
+			if (!DefStateTexture.Load(false, true)) {
+				Console.WriteLine("Default gui state texture not loaded.");
 			}
+			if (!DownStateTexture.Load(false, true)) {
+				Console.WriteLine("Down gui state texture not loaded.");
+			}
+
 			IsInit = true;
 		}
 
@@ -52,6 +60,7 @@ namespace Factorius {
 				Console.WriteLine("That element already exists in the GuiHandler.");
 				return;
 			}
+			element.SetGuiHandler(this);
 			List<Vector3> verts = new List<Vector3>();
 			List<Vector2> uvs = new List<Vector2>();
 			List<int> tris = new List<int>();
@@ -94,10 +103,10 @@ namespace Factorius {
 		public void OnRender(double delta) {
 			IsMouseOverElement = false;
 			guiShader.Use();
+			DefStateTexture.Bind();
 			guiShader.SetUniform("projectionMatrix", GetProjectionMatrix());
 			foreach (KeyValuePair<GuiElement, Mesh> e in elements) {
 				guiShader.SetUniform("posMatrix", GetPosMatrix(e.Key.GlobalPosition));
-				e.Value.Render();
 				if (e.Key is IGuiHoverable el) {
 					Vector2 mouse = Input.GetMousePos();
 					Vector2 pos = e.Key.GlobalPosition;
@@ -115,6 +124,8 @@ namespace Factorius {
 					}
 				}
 				e.Key.OnDraw(delta);
+				e.Value.Render();
+				DefStateTexture.Bind();
 			}
 			GL.UseProgram(0);
 		}
@@ -129,26 +140,18 @@ namespace Factorius {
 			return posMatrix;
 		}
 
-		public static void GenerateBackground(List<Vector3> verts, List<Vector2> uvs, List<int> tris, Vector2 s, string state) {
+		public static void GenerateBackground(GuiElement e, List<Vector3> verts, List<Vector2> uvs, List<int> tris, Vector2 s) {
 			Vector2 size = new Vector2((s.X < 64) ? 64 : s.X, (s.Y < 64) ? 64 : s.Y);
 
-			Vector2 down = new Vector2(0.0f, -AtlasHandler.UV_SIZE);
-			Vector2 right = new Vector2(-AtlasHandler.UV_SIZE, 0.0f);
+			Vector2 down = new Vector2(0.0f, -0.25f);
+			Vector2 right = new Vector2(32.0f / 128.0f, 0.0f);
+			Vector2 left = -right;
+			Vector2 up = -down;
 
-			AtlasPos topLeft = AtlasHandler.GetTexture(new Resource("Factorius", "Sprite/Gui/GuiBack" + state + "-0-0"));
-			AtlasPos topMiddle = AtlasHandler.GetTexture(new Resource("Factorius", "Sprite/Gui/GuiBack" + state + "-1-0"));
-			AtlasPos topRight = AtlasHandler.GetTexture(new Resource("Factorius", "Sprite/Gui/GuiBack" + state + "-2-0"));
-			AtlasPos middleLeft = AtlasHandler.GetTexture(new Resource("Factorius", "Sprite/Gui/GuiBack" + state + "-0-1"));
-			AtlasPos center = AtlasHandler.GetTexture(new Resource("Factorius", "Sprite/Gui/GuiBack" + state + "-1-1"));
-			AtlasPos middleRight = AtlasHandler.GetTexture(new Resource("Factorius", "Sprite/Gui/GuiBack" + state + "-2-1"));
-			AtlasPos bottomLeft = AtlasHandler.GetTexture(new Resource("Factorius", "Sprite/Gui/GuiBack" + state + "-0-2"));
-			AtlasPos bottomMiddle = AtlasHandler.GetTexture(new Resource("Factorius", "Sprite/Gui/GuiBack" + state + "-1-2"));
-			AtlasPos bottomRight = AtlasHandler.GetTexture(new Resource("Factorius", "Sprite/Gui/GuiBack" + state + "-2-2"));
-
-			if (topLeft.IsErr() || topMiddle.IsErr() || topRight.IsErr() || middleLeft.IsErr() || center.IsErr() || middleRight.IsErr() || bottomLeft.IsErr() || bottomMiddle.IsErr() || bottomRight.IsErr()) {
-				Console.WriteLine("GUI Background state texture not found: " + state);
-				return;
-			}
+			Vector2 topLeft = new Vector2(0.0f, 1.0f);
+			Vector2 bottomLeft = new Vector2(0.0f, 32.0f / 128.0f);
+			Vector2 bottomRight = new Vector2(96.0f / 128.0f, 32.0f / 128.0f);
+			Vector2 topRight = new Vector2(96.0f / 128.0f, 1.0f);
 
 			int i = verts.Count;
 
@@ -208,15 +211,18 @@ namespace Factorius {
 				new Vector3(size.X - 32.0f, 32.0f, 0.0f),			// 3
 			});
 			uvs.AddRange(new Vector2[] {
-				GFP(topLeft), GFP(topLeft) + down, GFP(topLeft) + down + right, GFP(topLeft) + right,
-				GFP(bottomLeft), GFP(bottomLeft) + down, GFP(bottomLeft) + down + right, GFP(bottomLeft) + right,
-				GFP(bottomRight), GFP(bottomRight) + down, GFP(bottomRight) + down + right, GFP(bottomRight) + right,
-				GFP(topRight), GFP(topRight) + down, GFP(topRight) + down + right, GFP(topRight) + right,
-				GFP(middleLeft), GFP(middleLeft) + down, GFP(middleLeft) + down + right, GFP(middleLeft) + right,
-				GFP(bottomMiddle), GFP(bottomMiddle) + down, GFP(bottomMiddle) + down + right, GFP(bottomMiddle) + right,
-				GFP(middleRight), GFP(middleRight) + down, GFP(middleRight) + down + right, GFP(middleRight) + right,
-				GFP(topMiddle), GFP(topMiddle) + down, GFP(topMiddle) + down + right, GFP(topMiddle) + right,
-				GFP(center), GFP(center) + down, GFP(center) + down + right, GFP(center) + right,
+				topLeft, topLeft + down, topLeft + down + right, topLeft + right,
+				bottomLeft + up, bottomLeft, bottomLeft + right, bottomLeft + up + right,
+				bottomRight + up + left, bottomRight + left, bottomRight, bottomRight + up,
+				topRight + left, topRight + down + left, topRight + down, topRight,
+
+				topLeft + down, bottomLeft + up, bottomLeft + right + up, topLeft + right + down,
+				bottomLeft + right + up, bottomLeft + right, bottomRight + left, bottomRight + left + up,
+				topRight + down + left, bottomRight + left + up, bottomRight + up, topRight + down,
+				topLeft + right, topLeft + down + right, topRight + left + down, topRight + left,
+
+				topLeft + right + down, bottomLeft + right + up, bottomRight + left + up, topRight + left + down,
+
 			});
 			tris.AddRange(new int[] {
 				i + 2, i + 0, i + 1,		i + 0, i + 2, i + 3,
@@ -231,9 +237,13 @@ namespace Factorius {
 			});
 		}
 
-		private static Vector2 GFP(AtlasPos pos) {
-			return new Vector2(1 - pos.GetUv().X, pos.GetUv().Y);
-		}
+	}
+
+	enum GuiMouseState {
+
+		NORMAL,
+		HOVERED,
+		PRESSED,
 
 	}
 }

@@ -87,7 +87,7 @@ namespace Factorius {
 			atlas.Mutate(a => a.Flip(FlipType.Vertical));
 			atlas.Mutate(a => a.Flip(FlipType.Horizontal));
 			texture = new TextureRaw(atlas);
-			if (!texture.Load()) {
+			if (!texture.Load(false, false)) {
 				Console.WriteLine("Failed to upload texture atlas to GPU: " + id);
 				return false;
 			}

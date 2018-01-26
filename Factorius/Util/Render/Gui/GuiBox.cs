@@ -20,9 +20,9 @@ namespace Factorius {
 
 		public override void OnRedraw(List<Vector3> verts, List<Vector2> uvs, List<int> tris) {
 			if (IsHovered) {
-				GuiHandler.GenerateBackground(verts, uvs, tris, size, "Down");
+				GuiHandler.GenerateBackground(this, verts, uvs, tris, size);
 			} else {
-				GuiHandler.GenerateBackground(verts, uvs, tris, size, "");
+				GuiHandler.GenerateBackground(this, verts, uvs, tris, size);
 			}
 		}
 
@@ -36,6 +36,11 @@ namespace Factorius {
 			if (IsHovered != prevHover) {
 				prevHover = IsHovered;
 				GuiHandler.RedrawElement(this);
+			}
+			if (IsHovered) {
+				GetGuiHandler().DownStateTexture.Bind();
+			} else {
+				GetGuiHandler().DefStateTexture.Bind();
 			}
 			prevHover = IsHovered;
 		}
