@@ -4,6 +4,7 @@ layout (location = 0) in vec3 pos;
 layout (location = 1) in vec2 uv;
 
 uniform vec2 screenSize;
+uniform float fontSize;
 
 out vec2 texCoord;
 

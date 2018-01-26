@@ -87,7 +87,7 @@ namespace Factorius {
 
 			GuiHandler.Init(new Resource("Factorius", "Sprite/Gui/GuiBack"));
 
-			FontRenderer.Init(new Resource("Factorius", "Font/Arial"), 48);
+			FontRenderer.SetFont(new Resource("Factorius", "Font/NotoSerif/NotoSerif-Regular"), 48);
 
 			AtlasHandler.BakeTextures();
 			Console.WriteLine("Baked textures.");
@@ -120,11 +120,16 @@ namespace Factorius {
 				vel.Normalize();
 				vel *= (float) delta * 10.0f;
 			}
+
 			Cam.transform.position += vel;
-			Vector3 p = Transformation.ScreenToWorld(Cam, Input.GetMousePos(), 0.0f);
-			//box.UpdateGlobalPosition(box.GlobalPosition + vel);
-			//obj.transform.position.X = p.X;
-			//obj.transform.position.Y = p.Y;
+			if (Input.IsKeyDown(Key.Q)) {
+				Cam.size += 2.0f * (float) delta;
+			}
+			if (Input.IsKeyDown(Key.E)) {
+				Cam.size -= 2.0f * (float) delta;
+			}
+			Cam.size = MathHelper.Clamp(Cam.size, 0.25f, 5.0f);
+
 			World.OnUpdate(delta);
 		}
 

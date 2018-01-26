@@ -15,15 +15,13 @@ namespace Factorius {
 
 		private int atlasWidth;
 		private int atlasHeight;
-
-		//private ShaderProgram plainShader;
+		private uint fontSize;
+		
 		private ShaderProgram fontShader;
 		private int fontTexture;
 
 		private Library library;
 		private Face face;
-
-		private Mesh textureTest;
 
 		private CharacterInfo[] c = new CharacterInfo[128 - 32];
 
@@ -33,15 +31,17 @@ namespace Factorius {
 		///		Initializes the font renderer with the specified font resource.
 		/// </summary>
 		/// <param name="path">The resource from which to load the TTF font file.</param>
-		public void Init(Resource path, uint size) {
+		public void SetFont(Resource path, uint size) {
 			if (IsInit) {
-				Console.WriteLine("This font renderer has already been initialized");
+				Console.WriteLine("Reloading font manager");
+				IsInit = false;
 			}
 			library = new Library();
 			
 			Console.WriteLine("Initializing font renderer with font: " + path);
 			face = new Face(library, path.GetFullPath() + ".ttf");
 			face.SetPixelSizes(0, size);
+			fontSize = size;
 
 			// Initialize the shaders for text rendering.
 			fontShader = new ShaderProgram();
@@ -51,33 +51,8 @@ namespace Factorius {
 				return;
 			}
 			fontShader.InitUniform("screenSize");
+			fontShader.InitUniform("fontSize");
 			fontShader.InitUniform("fontColor");
-
-			/*plainShader = new ShaderProgram();
-			plainShader.AddShaders(new Resource("Factorius", "Shader/Plain"));
-			if (!plainShader.Link()) {
-				Console.WriteLine("Failed to link plain shader.");
-				return;
-			}
-
-			Vector3[] testVerts = new Vector3[] {
-				new Vector3(-1f, -1f, 0.0f),	// 0
-				new Vector3(-1f, 1f, 0.0f),	// 1
-				new Vector3(1f, 1f, 0.0f),	// 2
-				new Vector3(1f, -1f, 0.0f),	// 3
-			};
-			Vector2[] testUvs = new Vector2[] {
-				new Vector2(0.0f, 1.0f),
-				new Vector2(0.0f, 0.0f),
-				new Vector2(1.0f, 0.0f),
-				new Vector2(1.0f, 1.0f),
-			};
-			int[] testInds = new int[] {
-				1, 0, 2,
-				3, 2, 0,
-			};
-			textureTest = new Mesh();
-			textureTest.SetMesh(testVerts, testInds, testUvs);*/
 
 			// Calculate maximum size of font texture atlas.
 			for (uint i = 32; i < 128; i ++) {
@@ -86,11 +61,13 @@ namespace Factorius {
 				atlasHeight = Math.Max(atlasHeight, face.Glyph.Bitmap.Rows);
 			}
 
-			Console.WriteLine("Creating font texture atlas with size: " + atlasWidth + "x" + atlasHeight);
+			fontShader.SetUniform("fontSize", size);
+
+			Console.WriteLine("Created ASCII texture atlas with size: " + atlasWidth + "x" + atlasHeight);
 
 			// Create the font texture atlas texture for the GPU.
 			fontTexture = GL.GenTexture();
-			GL.BindTexture(TextureTarget.Texture2D, fontTexture);
+			Bind();
 			GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R8, atlasWidth, atlasHeight, 0, PixelFormat.Red, PixelType.UnsignedByte, (IntPtr) 0);
 
@@ -123,9 +100,10 @@ namespace Factorius {
 				return null;
 			}
 
+			//pos.Y = Launch.Instance.Height - pos.Y - fontSize;
 			Vector2 startPos = new Vector2(pos.X, pos.Y);
 
-			GL.BindTexture(TextureTarget.Texture2D, fontTexture);
+			Bind();
 			char[] chars = text.ToCharArray();
 			List<Mesh> meshes = new List<Mesh>();
 			for (int i = 0; i < chars.Length; i ++) {
@@ -133,7 +111,7 @@ namespace Factorius {
 				CharacterInfo info = GetInfo(chars[i]);
 
 				float x = pos.X + info.bl;
-				float y = pos.Y + info.bt;
+				float y = Launch.Instance.Height - pos.Y - fontSize + info.bt;
 				float w = info.bw;
 				float h = info.bh;
 
@@ -179,19 +157,21 @@ namespace Factorius {
 			GL.Clear(ClearBufferMask.DepthBufferBit);
 			fontShader.Use();
 			fontShader.SetUniform("screenSize", screenSize);
-			GL.BindTexture(TextureTarget.Texture2D, fontTexture);
-			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, ref clamp);
-			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, ref clamp);
-			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, ref linearMin);
-			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, ref linearMag);
+			Bind();
 			foreach (RenderedText txt in rendered) {
 				fontShader.SetUniform("fontColor", txt.color);
 				foreach (Mesh mesh in txt.renderedChars) {
 					mesh.Render();
 				}
 			}
-			//plainShader.Use();
-			//textureTest.Render();
+		}
+
+		private void Bind() {
+			GL.BindTexture(TextureTarget.Texture2D, fontTexture);
+			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, ref clamp);
+			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, ref clamp);
+			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, ref linearMin);
+			GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, ref linearMag);
 		}
 
 		public bool RemoveText(RenderedText txt) {
